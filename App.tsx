@@ -322,7 +322,7 @@ const App: React.FC = () => {
       </div>
       
       <button 
-        onClick={() => window.open('https://hotmart.com', '_blank')}
+        onClick={() => window.open('https://chat.whatsapp.com/B8ySbaIg1E2H8tc3i42HYl', '_blank')}
         className="w-full max-w-lg py-6 bg-[#FACC15] text-black font-black uppercase tracking-[0.3em] text-xs md:text-sm rounded-2xl shadow-xl shadow-[#FACC15]/20 hover:scale-[1.02] hover:bg-[#EAB308] transition-all"
       >
         ACESSAR MATERIAL COMPLETO

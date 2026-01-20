@@ -32,7 +32,7 @@ export const PaymentGate: React.FC = () => {
           <div className="pt-6 space-y-4">
             <button 
               className="w-full py-6 bg-primary text-black font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl shadow-primary/10 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
-              onClick={() => window.open('https://hotmart.com', '_blank')}
+              onClick={() => window.open('https://chat.whatsapp.com/B8ySbaIg1E2H8tc3i42HYl', '_blank')}
             >
               Liberar Acesso Agora <CreditCard className="w-5 h-5" />
             </button>
