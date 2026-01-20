@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/channels4_profile.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FOCO PC BA | Elite da Investigação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#FACC15',
+              secondary: '#06B6D4',
+              ba: {
+                red: '#CE1126',
+                blue: '#0047AB',
+                white: '#FFFFFF'
+              },
+              police: {
+                900: '#0A0C10',
+                800: '#141820',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .dark body {
+        background-color: #050505;
+        color: #FFFFFF;
+      }
+      body {
+        background-color: #E9ECEF;
+        color: #1F2937;
+      }
+      h1, h2, h3, h4, .font-grotesk {
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      .glass-card {
+        transition: all 0.3s ease;
+      }
+      .dark .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .glass-card {
+        background: #F8FAFC;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08);
+        border-radius: 2.5rem;
+      }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      .dark ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+      
+      .animate-in {
+        animation: fadeIn 0.4s ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      input, textarea, select {
+        background-color: #F1F5F9 !important;
+      }
+      .dark input, .dark textarea, .dark select {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+      }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.49.1"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
