@@ -182,7 +182,7 @@ const App: React.FC = () => {
       </div>
       
       <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white mb-4 leading-none">
-        OPERACIONAL <span className="text-[#FACC15]">PC-BA</span>
+        OPERACIONAL <span className="text-[#FACC15]">PM-BA</span>
       </h1>
       
       {/* Badge de status */}
@@ -234,7 +234,7 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-black p-4 md:p-10 flex flex-col animate-in slide-in-from-bottom-4 duration-500">
         <header className="max-w-4xl mx-auto w-full flex items-center justify-between mb-8">
            <div className="space-y-1">
-             <span className="text-[#FACC15] text-[10px] font-black uppercase tracking-[0.3em]">PC-BA | Operação Investigador</span>
+             <span className="text-[#FACC15] text-[10px] font-black uppercase tracking-[0.3em]">PM-BA | Operação Investigador</span>
              <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Questão {currentIdx + 1} de {questions.length}</p>
            </div>
            <div className="flex items-center gap-4 px-6 py-2 bg-white/5 rounded-2xl border border-white/5">
