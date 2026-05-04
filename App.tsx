@@ -11,7 +11,9 @@ import {
   CheckCircle2,
   MousePointer2,
   Scissors,
-  ChevronLeft
+  ChevronLeft,
+  Check,
+  X
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -27,6 +29,7 @@ const App: React.FC = () => {
   // Estados para novas funcionalidades[cite: 1]
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
   const [selectedOptions, setSelectedOptions] = useState<Record<number, string>>({});
+  const [showFeedback, setShowFeedback] = useState(false); // Novo estado para feedback imediato
 
   const [questions, setQuestions] = useState<Question[]>([]); 
   const [isFetching, setIsFetching] = useState(true);
@@ -90,29 +93,16 @@ const App: React.FC = () => {
     setError(null);
     
     try {
-      const { data: prev } = await supabase
-        .from('lead_answers')
-        .select('is_correct, time_spent')
-        .eq('lead_email', cleanEmail);
-
-      if (prev && prev.length > 0) {
-        const mapped = prev.map((a: any) => ({ 
-          isCorrect: a.is_correct, 
-          timeSpent: a.time_spent 
-        }));
-        setAnswers(mapped);
-        setIsReturningUser(true);
-        setStep('result');
-        return;
-      }
-
+      // Registro do Lead mantido para sua base[cite: 1]
       await supabase.from('leads').upsert([{ email: cleanEmail }], { onConflict: 'email' });
+      
       setStep('simulation');
       setStartTime(Date.now());
       setCurrentIdx(0);
       setAnswers([]);
       setSelectedOptions({});
       setEliminatedOptions({});
+      setShowFeedback(false);
     } catch (err) {
       setStep('simulation');
       setStartTime(Date.now());
@@ -123,6 +113,7 @@ const App: React.FC = () => {
 
   // --- LÓGICA DA TESOURA ---[cite: 1]
   const toggleEliminate = (optionId: string) => {
+    if (showFeedback) return; // Bloqueia tesoura se já respondeu
     setEliminatedOptions(prev => {
       const currentEliminated = prev[currentIdx] || [];
       const isEliminated = currentEliminated.includes(optionId);
@@ -138,17 +129,14 @@ const App: React.FC = () => {
     }
   };
 
-  // --- SELEÇÃO DE RESPOSTA ---[cite: 1]
+  // --- SELEÇÃO DE RESPOSTA COM FEEDBACK ---[cite: 1]
   const handleSelect = (optionId: string) => {
+    if (showFeedback) return; // Impede mudar a resposta após o feedback
+    
     setSelectedOptions(prev => ({ ...prev, [currentIdx]: optionId }));
-  };
+    setShowFeedback(true); // Ativa o feedback visual na hora
 
-  // --- NAVEGAÇÃO ---[cite: 1]
-  const handleConfirmAndNext = async () => {
     const q = questions[currentIdx];
-    const optionId = selectedOptions[currentIdx];
-    if (!q || !optionId) return;
-
     const isCorrect = optionId.toLowerCase() === q.correctOptionId?.toLowerCase();
     const timeSpent = Date.now() - startTime;
     
@@ -156,15 +144,20 @@ const App: React.FC = () => {
     newAnswers[currentIdx] = { isCorrect, timeSpent };
     setAnswers(newAnswers);
 
+    // Salva a resposta no banco[cite: 1]
     supabase.from('lead_answers').insert([{
         lead_email: email.toLowerCase().trim(),
         question_id: q.id,
         is_correct: isCorrect,
         time_spent: timeSpent
     }]);
+  };
 
+  // --- NAVEGAÇÃO ---[cite: 1]
+  const handleNext = () => {
     if (currentIdx < questions.length - 1) {
       setCurrentIdx(prev => prev + 1);
+      setShowFeedback(false); // Reseta feedback para a nova questão
       setStartTime(Date.now());
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -175,6 +168,7 @@ const App: React.FC = () => {
   const handleBack = () => {
     if (currentIdx > 0) {
       setCurrentIdx(prev => prev - 1);
+      setShowFeedback(true); // Mantém feedback visível se já foi respondida
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -247,27 +241,51 @@ const App: React.FC = () => {
               {q.options.map((opt, i) => {
                 const isEliminated = currentEliminated.includes(opt.id);
                 const isSelected = currentSelection === opt.id;
+                const isCorrect = opt.id.toLowerCase() === q.correctOptionId?.toLowerCase();
+                
+                // Lógica de cores baseada no feedback imediato[cite: 1]
+                let style = "border-white/5 bg-white/[0.02] text-white/70";
+                
+                if (showFeedback) {
+                  if (isCorrect) {
+                    style = "border-emerald-500 bg-emerald-500/10 text-emerald-400";
+                  } else if (isSelected && !isCorrect) {
+                    style = "border-red-500 bg-red-500/10 text-red-400";
+                  } else {
+                    style = "border-white/5 bg-white/[0.01] text-white/20 opacity-50";
+                  }
+                } else if (isEliminated) {
+                  style = "opacity-20 grayscale cursor-not-allowed border-white/5";
+                } else if (isSelected) {
+                  style = "border-[#FACC15] bg-[#FACC15]/5 text-white";
+                }
+
                 return (
                   <div key={opt.id} className="flex gap-2 items-center group">
                     <button 
-                      disabled={isEliminated}
+                      disabled={isEliminated || showFeedback}
                       onClick={() => handleSelect(opt.id)}
                       className={`flex-1 p-5 rounded-2xl text-left border transition-all font-medium flex items-start gap-5 
-                        ${isEliminated ? 'opacity-20 grayscale cursor-not-allowed border-white/5' : 'hover:border-[#FACC15]/50 hover:bg-[#FACC15]/5'}
-                        ${isSelected ? 'border-[#FACC15] bg-[#FACC15]/10 text-white' : 'border-white/5 bg-white/[0.02] text-white/70'}`}
+                        ${style} ${!showFeedback && !isEliminated ? 'hover:border-[#FACC15]/50' : ''}`}
                     >
                       <span className={`w-8 h-8 shrink-0 rounded-lg border flex items-center justify-center text-xs font-black transition-all
-                        ${isSelected ? 'bg-[#FACC15] text-black border-[#FACC15]' : 'border-white/10 bg-black/40'}`}>
+                        ${isSelected || (showFeedback && isCorrect) ? 'bg-[#FACC15] text-black border-[#FACC15]' : 'border-white/10 bg-black/40'}`}>
                         {opt.label || String.fromCharCode(65 + i)}
                       </span>
                       <span className={`pt-1 text-sm md:text-base leading-snug ${isEliminated ? 'line-through' : ''}`}>{opt.text}</span>
+                      
+                      {showFeedback && isCorrect && <Check className="ml-auto w-5 h-5 text-emerald-500" />}
+                      {showFeedback && isSelected && !isCorrect && <X className="ml-auto w-5 h-5 text-red-500" />}
                     </button>
-                    <button 
-                      onClick={() => toggleEliminate(opt.id)}
-                      className={`p-4 rounded-xl border transition-all ${isEliminated ? 'bg-red-500/20 border-red-500 text-red-500' : 'bg-white/5 border-white/10 text-white/20 hover:text-white hover:border-white/30'}`}
-                    >
-                      <Scissors className="w-4 h-4" />
-                    </button>
+                    
+                    {!showFeedback && (
+                      <button 
+                        onClick={() => toggleEliminate(opt.id)}
+                        className={`p-4 rounded-xl border transition-all ${isEliminated ? 'bg-red-500/20 border-red-500 text-red-500' : 'bg-white/5 border-white/10 text-white/20 hover:text-white hover:border-white/30'}`}
+                      >
+                        <Scissors className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -281,12 +299,15 @@ const App: React.FC = () => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button 
-              onClick={handleConfirmAndNext} disabled={!currentSelection}
-              className="flex-1 py-6 bg-[#FACC15] text-black font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl hover:bg-[#EAB308] transition-all disabled:opacity-50"
-            >
-              {currentIdx === questions.length - 1 ? 'Finalizar Missão' : 'Confirmar & Próxima'}
-            </button>
+            
+            {showFeedback && (
+              <button 
+                onClick={handleNext}
+                className="flex-1 py-6 bg-[#FACC15] text-black font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl hover:bg-[#EAB308] transition-all animate-in slide-in-from-right-4"
+              >
+                {currentIdx === questions.length - 1 ? 'Finalizar Missão' : 'Próxima Questão'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -306,7 +327,7 @@ const App: React.FC = () => {
         RESULTADO <span className="text-[#FACC15]">FINAL</span>
       </h2>
       <div className="flex items-center gap-3 px-6 py-2 bg-white/5 border border-white/10 rounded-full text-white/40 text-[10px] font-black uppercase tracking-widest mb-12">
-        {isReturningUser ? <><History className="w-3 h-3" /> Histórico Recuperado</> : <><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Operação Concluída</>}
+        <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Operação Concluída
       </div>
       <div className="grid grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mb-12">
          <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-[2.5rem]">
